@@ -24,6 +24,7 @@ import java.util.logging.Logger;
  */
 public class AutoCompleteController implements Initializable{
     private static Logger exceptionLogger;
+    private static boolean debugMode = true;
 
     @FXML
     private Label timeRequired;
@@ -48,10 +49,13 @@ public class AutoCompleteController implements Initializable{
     private CheckMenuItem parallelStreamArrayList;
     @FXML
     private CheckMenuItem parallelStreamLinkedList;
+    @FXML
+    private CheckMenuItem prefixTreeSearchTrie;
 
     private ParallelStreamSearch parallelStreamSearch;
     private IndexSearch indexSearch;
     private ForeachSearch foreachSearch;
+    private PrefixTreeSearch prefixTreeSearch;
     private File file;
     private List<String> list;
 
@@ -230,6 +234,29 @@ public class AutoCompleteController implements Initializable{
     }
 
     /**
+     * This is called by a checkMenuItem and will call the appropriate methods to sort
+     * through a trie (prefix tree). This method will also note the time the operation
+     * took in the UI.
+     */
+    @FXML
+    public void prefixTreeSearch(){
+        setMenuFalse();
+        prefixTreeSearchTrie.setSelected(true);
+        String prefix = searchQuery.getText();
+        if(!prefix.equals("")){
+            prefixTreeSearch = new PrefixTreeSearch();
+            prefixTreeSearch.initialize(file.toString());
+            prefixTreeSearch.getOperationTime();
+            this.list = prefixTreeSearch.allThatBeginWith(prefix);
+            updateTimeRequired(prefixTreeSearch.getOperationTime());
+            updateMatches(this.list);
+        } else {
+            clearUI();
+        }
+
+    }
+
+    /**
      * This method is ran when someone starts typing and it calls the appropriate strategy
      * for autocompleting the query
      */
@@ -248,6 +275,8 @@ public class AutoCompleteController implements Initializable{
                 parallelStreamArrayList();
             } else if (parallelStreamLinkedList.isSelected()) {
                 parallelStreamLinkedList();
+            } else if (prefixTreeSearchTrie.isSelected()){
+                prefixTreeSearch();
             }
         } catch(NoSuchElementException noElement){
             logException("Error: " + noElement.getMessage());
@@ -262,6 +291,7 @@ public class AutoCompleteController implements Initializable{
         iterateLinkedList.setSelected(false);
         parallelStreamArrayList.setSelected(false);
         parallelStreamLinkedList.setSelected(false);
+        prefixTreeSearchTrie.setSelected(false);
     }
 
     private void alertPopUp(String message){
@@ -276,12 +306,14 @@ public class AutoCompleteController implements Initializable{
     }
 
     private void updateMatches(List<String> list){
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String line : list) {
-            stringBuilder.append(line + "\n");
+        if(!debugMode) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (String line : list) {
+                stringBuilder.append(line + "\n");
+            }
+            matches.setText(stringBuilder.toString());
+            updateAmountMatches(list.size());
         }
-        matches.setText(stringBuilder.toString());
-        updateAmountMatches(list.size());
     }
     private void updateAmountMatches(int amountMatches){
         this.amountMatches.setText("Matches found: " + amountMatches);

@@ -1,38 +1,26 @@
 package zupkeim;
 
-import java.util.HashMap;
+
+import javafx.scene.control.Alert;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Scanner;
+import java.util.logging.Logger;
 
 public class PrefixTreeSearch implements AutoCompleter {
 
-    private TrieNode root;
-
-
-    /*
-    * Do a dynamically sized array to store the letters rather than a fixed size. Init time may be longer but search time will be short enough that it could make up for it (just use this in a situation where it is
-    * always running. otherwise, we could do a fixed size array to store characters where memory is not limited for quicker insert time. Engineers could decide the most efficient ways to implement this
-    * data structure depending on what they need it for. Maybe build both of them for a demonstration. Could do a method that allows it to intelligently decide what would be msot efficient depending on the amount
-    * of words that will be added.
-    *
-    * THIS WILL BE THE FIXED SIZED ARRAY TRIENODE
-     */
-    private class TrieNode {
-        TrieNode root;
-        TrieNode[] chars = new TrieNode[39]; //39 is the size used for the array
-        String content;
-        boolean isWord;
-
-        TrieNode(){
-            root = new TrieNode();
-        }
-
-        void insert(TrieNode node){
-            TrieNode start = node;
-        }
-    }
+    private static Logger logger;
+    private Trie trie;
+    private long startTime = 0;
+    private long endTime = 0;
 
     public PrefixTreeSearch(){
-        root = new TrieNode();
+        trie = new Trie();
     }
 
     /**
@@ -42,7 +30,31 @@ public class PrefixTreeSearch implements AutoCompleter {
      */
     @Override
     public void initialize(String filename) {
-
+        if(filename.substring(filename.lastIndexOf(".")).equalsIgnoreCase(".csv")){
+            String line = "";
+            final String CSV_SPLIT = ",";
+            try(BufferedReader in = new BufferedReader(new FileReader(filename))) {
+                while((line = in.readLine()) != null){
+                    String[] domain = line.split(CSV_SPLIT);
+                    trie.insert(domain[1]);
+                }
+            } catch (FileNotFoundException notFound) {
+                logException("Error: " + notFound.getMessage());
+                alertPopUp("Error: " + notFound.getMessage());
+            } catch (IOException ioException) {
+                logException("Error: " + ioException.getMessage());
+                alertPopUp("Error: " + ioException.getMessage());
+            }
+        } else {
+            try(Scanner in = new Scanner(Paths.get(filename))){
+                while(in.hasNextLine()){
+                    trie.insert(in.nextLine());
+                }
+            } catch (IOException ioException){
+                logException("Error: " + ioException.getMessage());
+                alertPopUp("Error: " + ioException.getMessage());
+            }
+        }
     }
 
     /**
@@ -55,7 +67,7 @@ public class PrefixTreeSearch implements AutoCompleter {
      */
     @Override
     public List<String> allThatBeginWith(String prefix) {
-        return null;
+        return trie.getAll(prefix);
     }
 
     /**
@@ -66,8 +78,19 @@ public class PrefixTreeSearch implements AutoCompleter {
      */
     @Override
     public long getOperationTime() {
-        return 0;
+        startTime = endTime;
+        endTime = System.nanoTime();
+        return endTime - startTime;
     }
 
-
+    private void alertPopUp(String message){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("File Read Error");
+        alert.setHeaderText("Error when reading file");
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    private void logException(String message){
+        logger.severe("Caused by: " + this.getClass().getSimpleName() + ". " + message);
+    }
 }

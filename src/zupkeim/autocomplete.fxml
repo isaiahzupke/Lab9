@@ -27,6 +27,7 @@
             <CheckMenuItem mnemonicParsing="false" text="LinkedList (Itr)" onAction="#iterateLinkedList" fx:id="iterateLinkedList"/>
             <CheckMenuItem mnemonicParsing="false" text="ArrayList (P.S.)" onAction="#parallelStreamArrayList" fx:id="parallelStreamArrayList"/>
             <CheckMenuItem mnemonicParsing="false" text="LinkedList (P.S.)" onAction="#parallelStreamLinkedList" fx:id="parallelStreamLinkedList"/>
+            <CheckMenuItem mnemonicParsing="false" text="Prefix Tree" onAction="#prefixTreeSearch" fx:id="prefixTreeSearchTrie"/>
           </items>
         </Menu>
       </menus>
