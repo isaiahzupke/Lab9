@@ -99,11 +99,16 @@ public class AutoCompleteController implements Initializable{
             if(fileExtension.equals(".csv") || fileExtension.equals(".txt")){
                 this.file = input;
                 strategyMenuDropdown.setDisable(false);
-                String fileName = input.toString().substring(input.toString().lastIndexOf("\\"));
+                String fileName = input.toString().substring(input.toString().lastIndexOf("\\") + 1);
                 if(fileName.equals("words.txt")){
                     benchmarkAll = true;
+                    benchmarkNewAndArrayList = false;
                 } else if(fileName.equals("top-1m.csv")){
                     benchmarkNewAndArrayList = true;
+                    benchmarkAll = false;
+                } else {
+                    benchmarkAll = false;
+                    benchmarkNewAndArrayList = false;
                 }
             } else {
                 alertPopUp("Please select a correct file type", true);
@@ -127,14 +132,14 @@ public class AutoCompleteController implements Initializable{
         setMenuFalse();
         indexArrayList.setSelected(true);
         String prefix = searchQuery.getText();
-        long time = 0;
+        String time = "";
         if(!prefix.equals("")) {
             indexSearch = new IndexSearch(new ArrayList<>(), exceptionLogger);
             indexSearch.initialize(file.toString());
             indexSearch.getOperationTime();
             this.list = indexSearch.allThatBeginWith(prefix);
-            time = indexSearch.getOperationTime();
-            updateTimeRequired(time);
+            time = calculateTimeRequired(indexSearch.getOperationTime());
+            setTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
@@ -152,14 +157,14 @@ public class AutoCompleteController implements Initializable{
         setMenuFalse();
         indexLinkedList.setSelected(true);
         String prefix = searchQuery.getText();
-        long time = 0;
+        String time = "";
         if(!prefix.equals("")) {
             indexSearch = new IndexSearch(new LinkedList<>(), exceptionLogger);
             indexSearch.initialize(file.toString());
             indexSearch.getOperationTime();
             this.list = indexSearch.allThatBeginWith(prefix);
-            time = indexSearch.getOperationTime();
-            updateTimeRequired(time);
+            time = calculateTimeRequired(indexSearch.getOperationTime());
+            setTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
@@ -177,14 +182,14 @@ public class AutoCompleteController implements Initializable{
         setMenuFalse();
         iterateArrayList.setSelected(true);
         String prefix = searchQuery.getText();
-        long time = 0;
+        String time = "";
         if(!prefix.equals("")) {
             foreachSearch = new ForeachSearch(new ArrayList<>(), exceptionLogger);
             foreachSearch.initialize(file.toString());
             foreachSearch.getOperationTime();
             this.list = foreachSearch.allThatBeginWith(prefix);
-            time = foreachSearch.getOperationTime();
-            updateTimeRequired(time);
+            time = calculateTimeRequired(foreachSearch.getOperationTime());
+            setTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
@@ -202,14 +207,14 @@ public class AutoCompleteController implements Initializable{
         setMenuFalse();
         iterateLinkedList.setSelected(true);
         String prefix = searchQuery.getText();
-        long time = 0;
+        String time = "";
         if(!prefix.equals("")) {
             foreachSearch = new ForeachSearch(new LinkedList<>(), exceptionLogger);
             foreachSearch.initialize(file.toString());
             foreachSearch.getOperationTime();
             this.list = foreachSearch.allThatBeginWith(prefix);
-            time = foreachSearch.getOperationTime();
-            updateTimeRequired(time);
+            time = calculateTimeRequired(foreachSearch.getOperationTime());
+            setTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
@@ -228,14 +233,14 @@ public class AutoCompleteController implements Initializable{
         setMenuFalse();
         parallelStreamArrayList.setSelected(true);
         String prefix = searchQuery.getText();
-        long time = 0;
+        String time = "";
         if(!prefix.equals("")) {
             parallelStreamSearch = new ParallelStreamSearch(new ArrayList<>(), exceptionLogger);
             parallelStreamSearch.initialize(file.toString());
             parallelStreamSearch.getOperationTime();
             this.list = parallelStreamSearch.allThatBeginWith(prefix);
-            time = parallelStreamSearch.getOperationTime();
-            updateTimeRequired(time);
+            time = calculateTimeRequired(parallelStreamSearch.getOperationTime());
+            setTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
@@ -254,14 +259,14 @@ public class AutoCompleteController implements Initializable{
         setMenuFalse();
         parallelStreamLinkedList.setSelected(true);
         String prefix = searchQuery.getText();
-        long time = 0;
+        String time = "";
         if(!prefix.equals("")) {
             parallelStreamSearch = new ParallelStreamSearch(new LinkedList<>(), exceptionLogger);
             parallelStreamSearch.initialize(file.toString());
             parallelStreamSearch.getOperationTime();
             this.list = parallelStreamSearch.allThatBeginWith(prefix);
-            time = parallelStreamSearch.getOperationTime();
-            updateTimeRequired(time);
+            time = calculateTimeRequired(parallelStreamSearch.getOperationTime());
+            setTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
@@ -280,14 +285,14 @@ public class AutoCompleteController implements Initializable{
         setMenuFalse();
         prefixTreeSearchTrie.setSelected(true);
         String prefix = searchQuery.getText();
-        long time = 0;
+        String time = "";
         if(!prefix.equals("")){
             prefixTreeSearch = new PrefixTreeSearch();
             prefixTreeSearch.initialize(file.toString());
             prefixTreeSearch.getOperationTime();
             this.list = prefixTreeSearch.allThatBeginWith(prefix);
-            time = prefixTreeSearch.getOperationTime();
-            updateTimeRequired(time);
+            time = calculateTimeRequired(prefixTreeSearch.getOperationTime());
+            setTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
@@ -301,14 +306,14 @@ public class AutoCompleteController implements Initializable{
         setMenuFalse();
         sortedArrayList.setSelected(true);
         String prefix = searchQuery.getText();
-        long time = 0;
+        String time = "";
         if(!prefix.equals("")){
             sortedArrayListSearch = new SortedArrayListSearch(new ArrayList<>(), exceptionLogger);
             sortedArrayListSearch.initialize(file.toString());
             sortedArrayListSearch.getOperationTime();
             this.list = sortedArrayListSearch.allThatBeginWith(prefix);
-            time = sortedArrayListSearch.getOperationTime();
-            updateTimeRequired(time);
+            time = calculateTimeRequired(sortedArrayListSearch.getOperationTime());
+            setTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
@@ -323,6 +328,24 @@ public class AutoCompleteController implements Initializable{
     @FXML
     public void runSelectedSearch(){ //this is ran when someone starts typing
         try {
+            if (indexArrayList.isSelected()) {
+                indexArrayList();
+            } else if (indexLinkedList.isSelected()) {
+                indexLinkedList();
+            } else if (iterateArrayList.isSelected()) {
+                iterateArrayList();
+            } else if (iterateLinkedList.isSelected()) {
+                iterateLinkedList();
+            } else if (parallelStreamArrayList.isSelected()) {
+                parallelStreamArrayList();
+            } else if (parallelStreamLinkedList.isSelected()) {
+                parallelStreamLinkedList();
+            } else if (prefixTreeSearchTrie.isSelected()){
+                prefixTreeSearch();
+            } else if (sortedArrayList.isSelected()){
+                sortedArrayListSearch();
+            }
+
             if(benchmarkAll && searchQuery.getText().equals("f")){
                 String benchmarkResults = "";
                 benchmarkResults = indexArrayList() + "\n";
@@ -341,23 +364,6 @@ public class AutoCompleteController implements Initializable{
                 benchmarkResults += prefixTreeSearch() + "\n";
                 benchmarkResults += sortedArrayListSearch();
                 alertPopUp(benchmarkResults, false);
-            }
-            if (indexArrayList.isSelected()) {
-                indexArrayList();
-            } else if (indexLinkedList.isSelected()) {
-                indexLinkedList();
-            } else if (iterateArrayList.isSelected()) {
-                iterateArrayList();
-            } else if (iterateLinkedList.isSelected()) {
-                iterateLinkedList();
-            } else if (parallelStreamArrayList.isSelected()) {
-                parallelStreamArrayList();
-            } else if (parallelStreamLinkedList.isSelected()) {
-                parallelStreamLinkedList();
-            } else if (prefixTreeSearchTrie.isSelected()){
-                prefixTreeSearch();
-            } else if (sortedArrayList.isSelected()){
-                sortedArrayListSearch();
             }
         } catch(NoSuchElementException noElement){
             logException("Error: " + noElement.getMessage());
@@ -405,7 +411,7 @@ public class AutoCompleteController implements Initializable{
      * A time is passed in and this formats it correctly and submits it to the UI
      * @param timeReq time that a calculation took in nanoseconds
      */
-    private void updateTimeRequired(long timeReq){
+    private String calculateTimeRequired(long timeReq){
         final int MILLI_OFFSET = 3;
         final int MICRO_OFFSET = 6;
         final int NANO_OFFSET = 9;
@@ -453,11 +459,15 @@ public class AutoCompleteController implements Initializable{
             formattedTime = String.format("%03d.%03d", nanoseconds,
                     (int)(time*Math.pow(SCIENTIFIC_NOTATION_VALUE, PICO_OFFSET)));
         }
-        timeRequired.setText("Time required: " + formattedTime + label);
+        return "Time required: " + formattedTime + label;
+    }
+
+    private void setTimeRequired(String timeRequired){
+        this.timeRequired.setText(timeRequired);
     }
 
     private void clearUI(){
         updateMatches(new ArrayList<>());
-        updateTimeRequired(0);
+        setTimeRequired(calculateTimeRequired(0));
     }
 }
