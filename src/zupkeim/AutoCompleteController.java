@@ -62,6 +62,9 @@ public class AutoCompleteController implements Initializable{
     private File file;
     private List<String> list;
 
+    private boolean benchmarkAll = false;
+    private boolean benchmarkNewAndArrayList = false;
+
     /**
      * Init method, creates the exception logger
      * @param location the location
@@ -96,15 +99,21 @@ public class AutoCompleteController implements Initializable{
             if(fileExtension.equals(".csv") || fileExtension.equals(".txt")){
                 this.file = input;
                 strategyMenuDropdown.setDisable(false);
+                String fileName = input.toString().substring(input.toString().lastIndexOf("\\"));
+                if(fileName.equals("words.txt")){
+                    benchmarkAll = true;
+                } else if(fileName.equals("top-1m.csv")){
+                    benchmarkNewAndArrayList = true;
+                }
             } else {
-                alertPopUp("Please select a correct file type");
+                alertPopUp("Please select a correct file type", true);
             }
         } catch (IndexOutOfBoundsException outOfBoundsException) {
             outOfBoundsException.printStackTrace();
             logException("Error: " + outOfBoundsException.getMessage());
-            alertPopUp("Error: File Read Failure. \nError Msg: " + outOfBoundsException.getMessage());
+            alertPopUp("Error: File Read Failure. \nError Msg: " + outOfBoundsException.getMessage(), true);
         } catch (NullPointerException nullPointerException){
-            alertPopUp("Error: You did not chose a file");
+            alertPopUp("Error: You did not chose a file", true);
         }
     }
 
@@ -113,20 +122,24 @@ public class AutoCompleteController implements Initializable{
      * This method will also note the time the operation took and update the UI
      */
     @FXML
-    public void indexArrayList(){
+    public String indexArrayList(){
+        final String METHOD_NAME = "indexArrayList(): ";
         setMenuFalse();
         indexArrayList.setSelected(true);
         String prefix = searchQuery.getText();
+        long time = 0;
         if(!prefix.equals("")) {
             indexSearch = new IndexSearch(new ArrayList<>(), exceptionLogger);
             indexSearch.initialize(file.toString());
             indexSearch.getOperationTime();
             this.list = indexSearch.allThatBeginWith(prefix);
-            updateTimeRequired(indexSearch.getOperationTime());
+            time = indexSearch.getOperationTime();
+            updateTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
         }
+        return METHOD_NAME + time;
     }
 
     /**
@@ -134,20 +147,24 @@ public class AutoCompleteController implements Initializable{
      * This method will also note the time the operation took and update the UI
      */
     @FXML
-    public void indexLinkedList(){
+    public String indexLinkedList(){
+        final String METHOD_NAME = "indexLinkedList(): ";
         setMenuFalse();
         indexLinkedList.setSelected(true);
         String prefix = searchQuery.getText();
+        long time = 0;
         if(!prefix.equals("")) {
             indexSearch = new IndexSearch(new LinkedList<>(), exceptionLogger);
             indexSearch.initialize(file.toString());
             indexSearch.getOperationTime();
             this.list = indexSearch.allThatBeginWith(prefix);
-            updateTimeRequired(indexSearch.getOperationTime());
+            time = indexSearch.getOperationTime();
+            updateTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
         }
+        return METHOD_NAME + time;
     }
 
     /**
@@ -155,20 +172,24 @@ public class AutoCompleteController implements Initializable{
      * This method will also note the time the operation took and update the UI
      */
     @FXML
-    public void iterateArrayList(){
+    public String iterateArrayList(){
+        final String METHOD_NAME = "iterateArrayList(): ";
         setMenuFalse();
         iterateArrayList.setSelected(true);
         String prefix = searchQuery.getText();
+        long time = 0;
         if(!prefix.equals("")) {
             foreachSearch = new ForeachSearch(new ArrayList<>(), exceptionLogger);
             foreachSearch.initialize(file.toString());
             foreachSearch.getOperationTime();
             this.list = foreachSearch.allThatBeginWith(prefix);
-            updateTimeRequired(foreachSearch.getOperationTime());
+            time = foreachSearch.getOperationTime();
+            updateTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
         }
+        return METHOD_NAME + time;
     }
 
     /**
@@ -176,20 +197,24 @@ public class AutoCompleteController implements Initializable{
      * This method will also note the time the operation took and update the UI
      */
     @FXML
-    public void iterateLinkedList(){
+    public String iterateLinkedList(){
+        final String METHOD_NAME = "iterateLinkedList(): ";
         setMenuFalse();
         iterateLinkedList.setSelected(true);
         String prefix = searchQuery.getText();
+        long time = 0;
         if(!prefix.equals("")) {
             foreachSearch = new ForeachSearch(new LinkedList<>(), exceptionLogger);
             foreachSearch.initialize(file.toString());
             foreachSearch.getOperationTime();
             this.list = foreachSearch.allThatBeginWith(prefix);
-            updateTimeRequired(foreachSearch.getOperationTime());
+            time = foreachSearch.getOperationTime();
+            updateTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
         }
+        return METHOD_NAME + time;
     }
 
     /**
@@ -198,20 +223,24 @@ public class AutoCompleteController implements Initializable{
      * the operation took and update the UI
      */
     @FXML
-    public void parallelStreamArrayList(){
+    public String parallelStreamArrayList(){
+        final String METHOD_NAME = "parallelStreamArrayList(): ";
         setMenuFalse();
         parallelStreamArrayList.setSelected(true);
         String prefix = searchQuery.getText();
+        long time = 0;
         if(!prefix.equals("")) {
             parallelStreamSearch = new ParallelStreamSearch(new ArrayList<>(), exceptionLogger);
             parallelStreamSearch.initialize(file.toString());
             parallelStreamSearch.getOperationTime();
             this.list = parallelStreamSearch.allThatBeginWith(prefix);
-            updateTimeRequired(parallelStreamSearch.getOperationTime());
+            time = parallelStreamSearch.getOperationTime();
+            updateTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
         }
+        return METHOD_NAME + time;
     }
 
     /**
@@ -220,20 +249,24 @@ public class AutoCompleteController implements Initializable{
      * the operation took and update the UI.
      */
     @FXML
-    public void parallelStreamLinkedList(){
+    public String parallelStreamLinkedList(){
+        final String METHOD_NAME = "parallelStreamLinkedList(): ";
         setMenuFalse();
         parallelStreamLinkedList.setSelected(true);
         String prefix = searchQuery.getText();
+        long time = 0;
         if(!prefix.equals("")) {
             parallelStreamSearch = new ParallelStreamSearch(new LinkedList<>(), exceptionLogger);
             parallelStreamSearch.initialize(file.toString());
             parallelStreamSearch.getOperationTime();
             this.list = parallelStreamSearch.allThatBeginWith(prefix);
-            updateTimeRequired(parallelStreamSearch.getOperationTime());
+            time = parallelStreamSearch.getOperationTime();
+            updateTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
         }
+        return METHOD_NAME + time;
     }
 
     /**
@@ -242,38 +275,45 @@ public class AutoCompleteController implements Initializable{
      * took in the UI.
      */
     @FXML
-    public void prefixTreeSearch(){
+    public String prefixTreeSearch(){
+        final String METHOD_NAME = "prefixTreeSearch(): ";
         setMenuFalse();
         prefixTreeSearchTrie.setSelected(true);
         String prefix = searchQuery.getText();
+        long time = 0;
         if(!prefix.equals("")){
             prefixTreeSearch = new PrefixTreeSearch();
             prefixTreeSearch.initialize(file.toString());
             prefixTreeSearch.getOperationTime();
             this.list = prefixTreeSearch.allThatBeginWith(prefix);
-            updateTimeRequired(prefixTreeSearch.getOperationTime());
+            time = prefixTreeSearch.getOperationTime();
+            updateTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
         }
-
+        return METHOD_NAME + time;
     }
 
     @FXML
-    public void sortedArrayListSearch(){
+    public String sortedArrayListSearch(){
+        final String METHOD_NAME = "sortedArrayListSearch(): ";
         setMenuFalse();
         sortedArrayList.setSelected(true);
         String prefix = searchQuery.getText();
+        long time = 0;
         if(!prefix.equals("")){
             sortedArrayListSearch = new SortedArrayListSearch(new ArrayList<>(), exceptionLogger);
             sortedArrayListSearch.initialize(file.toString());
             sortedArrayListSearch.getOperationTime();
             this.list = sortedArrayListSearch.allThatBeginWith(prefix);
-            updateTimeRequired(sortedArrayListSearch.getOperationTime());
+            time = sortedArrayListSearch.getOperationTime();
+            updateTimeRequired(time);
             updateMatches(this.list);
         } else {
             clearUI();
         }
+        return METHOD_NAME + time;
     }
 
     /**
@@ -283,6 +323,25 @@ public class AutoCompleteController implements Initializable{
     @FXML
     public void runSelectedSearch(){ //this is ran when someone starts typing
         try {
+            if(benchmarkAll && searchQuery.getText().equals("f")){
+                String benchmarkResults = "";
+                benchmarkResults = indexArrayList() + "\n";
+                benchmarkResults += indexLinkedList() + "\n";
+                benchmarkResults += iterateArrayList() + "\n";
+                benchmarkResults += iterateLinkedList() + "\n";
+                benchmarkResults += parallelStreamArrayList() + "\n";
+                benchmarkResults += parallelStreamLinkedList() + "\n";
+                benchmarkResults += prefixTreeSearch() + "\n";
+                benchmarkResults += sortedArrayListSearch();
+                alertPopUp(benchmarkResults, false);
+            } else if(benchmarkNewAndArrayList && searchQuery.getText().equals("v")){
+                String benchmarkResults = "";
+                benchmarkResults = indexArrayList() + "\n";
+                benchmarkResults += iterateArrayList() + "\n";
+                benchmarkResults += prefixTreeSearch() + "\n";
+                benchmarkResults += sortedArrayListSearch();
+                alertPopUp(benchmarkResults, false);
+            }
             if (indexArrayList.isSelected()) {
                 indexArrayList();
             } else if (indexLinkedList.isSelected()) {
@@ -302,7 +361,7 @@ public class AutoCompleteController implements Initializable{
             }
         } catch(NoSuchElementException noElement){
             logException("Error: " + noElement.getMessage());
-            alertPopUp("Error: " + noElement.getMessage());
+            alertPopUp("Error: " + noElement.getMessage(), true);
         }
     }
 
@@ -317,10 +376,10 @@ public class AutoCompleteController implements Initializable{
         sortedArrayList.setSelected(false);
     }
 
-    private void alertPopUp(String message){
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error Popup");
-        alert.setHeaderText("Error");
+    private void alertPopUp(String message, boolean isError){
+        Alert alert = new Alert(isError ? Alert.AlertType.ERROR : Alert.AlertType.INFORMATION);
+        alert.setTitle("Informational Popup");
+        alert.setHeaderText("Notice");
         alert.setContentText(message);
         alert.showAndWait();
     }
