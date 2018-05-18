@@ -55,7 +55,7 @@ public class SortedArrayListSearch implements AutoCompleter{
                 returnList.add(list.get(i));
             }
         }
-        return returnList;//
+        return returnList;
     }
 
     /**
