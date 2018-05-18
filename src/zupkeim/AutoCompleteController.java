@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class AutoCompleteController implements Initializable{
     private static Logger exceptionLogger;
-    private static boolean debugMode = true;
+    private static boolean debugMode = false;
 
     @FXML
     private Label timeRequired;
@@ -51,11 +51,14 @@ public class AutoCompleteController implements Initializable{
     private CheckMenuItem parallelStreamLinkedList;
     @FXML
     private CheckMenuItem prefixTreeSearchTrie;
+    @FXML
+    private CheckMenuItem sortedArrayList;
 
     private ParallelStreamSearch parallelStreamSearch;
     private IndexSearch indexSearch;
     private ForeachSearch foreachSearch;
     private PrefixTreeSearch prefixTreeSearch;
+    private SortedArrayListSearch sortedArrayListSearch;
     private File file;
     private List<String> list;
 
@@ -256,6 +259,23 @@ public class AutoCompleteController implements Initializable{
 
     }
 
+    @FXML
+    public void sortedArrayListSearch(){
+        setMenuFalse();
+        sortedArrayList.setSelected(true);
+        String prefix = searchQuery.getText();
+        if(!prefix.equals("")){
+            sortedArrayListSearch = new SortedArrayListSearch(new ArrayList<>(), exceptionLogger);
+            sortedArrayListSearch.initialize(file.toString());
+            sortedArrayListSearch.getOperationTime();
+            this.list = sortedArrayListSearch.allThatBeginWith(prefix);
+            updateTimeRequired(sortedArrayListSearch.getOperationTime());
+            updateMatches(this.list);
+        } else {
+            clearUI();
+        }
+    }
+
     /**
      * This method is ran when someone starts typing and it calls the appropriate strategy
      * for autocompleting the query
@@ -277,6 +297,8 @@ public class AutoCompleteController implements Initializable{
                 parallelStreamLinkedList();
             } else if (prefixTreeSearchTrie.isSelected()){
                 prefixTreeSearch();
+            } else if (sortedArrayList.isSelected()){
+                sortedArrayListSearch();
             }
         } catch(NoSuchElementException noElement){
             logException("Error: " + noElement.getMessage());
@@ -292,6 +314,7 @@ public class AutoCompleteController implements Initializable{
         parallelStreamArrayList.setSelected(false);
         parallelStreamLinkedList.setSelected(false);
         prefixTreeSearchTrie.setSelected(false);
+        sortedArrayList.setSelected(false);
     }
 
     private void alertPopUp(String message){
